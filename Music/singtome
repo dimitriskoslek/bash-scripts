@@ -1,0 +1,19 @@
+#!/bin/bash
+# Choose a directory from ~/Music/, shuffle the containing tracks and enqueue a playlist
+
+prompt="What would you like me to sing to you?"
+options=($(ls -1 ~/Music))
+
+PS3="$prompt "
+
+select opt in "${options[@]}" "Quit" ; do
+    if (( REPLY == 1 + ${#options[@]} )) ; then
+        exit
+    elif (( REPLY > 0 && REPLY <= ${#options[@]} )) ; then
+	cvlc --no-one-instance --no-video --started-from-file -Z --playlist-enqueue ~/Music/"$opt"
+        break
+    else
+        echo "Invalid option. Try another one."
+    fi
+done
+

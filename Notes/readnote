@@ -1,0 +1,22 @@
+#!/bin/bash
+# Choose a note from ~/mynotes and read it
+
+prompt="Which note do you want to read?"
+options=($(ls -1 ~/mynotes))
+
+PS3="$prompt "
+
+select opt in "${options[@]}" "Quit" ; do
+    if (( REPLY == 1 + ${#options[@]} )) ; then
+        exit
+    elif (( REPLY > 0 && REPLY <= ${#options[@]} )) ; then
+	echo "-----"
+	echo "$opt"
+	echo "-----"
+	cat ~/mynotes/"$opt"
+        break
+    else
+        echo "Invalid option."
+    fi
+done
+

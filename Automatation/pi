@@ -1,0 +1,237 @@
+#!/bin/bash
+# This is a script which helps quickly initialize projects
+
+# Ask where the file should be placed
+prompt="What kind of project is this going to be?"$'\n'
+options=("Wordpress Specific Plugin" "nodejs API")
+
+PS3="$prompt "
+
+select opt in "${options[@]}" "Quit" ; do
+        # If quit is chosen, exit
+        if (( REPLY == 1 + ${#options[@]} )) ; then
+                exit
+        elif (( REPLY > 0 && REPLY <= ${#options[@]} )) ; then
+		# On valid reply, check which answer it was
+		if (( REPLY == 1 )) ; then
+			###############################
+			## Wordpress Specific Plugin ##
+			###############################
+
+			# Create the plugin directory and base file from input
+			#######################################################
+			read -rp "What is the project prefix?"$'\n' project_prefix
+                	mkdir ~/Projects/"$project_prefix"-specific-plugin
+			touch ~/Projects/"$project_prefix"-specific-plugin/"$project_prefix"-specific-plugin.php
+
+			# Print the basics into the base file
+			#######################################
+			{
+				echo "<?php"
+				echo ""
+				echo "/*"
+				echo "Plugin Name: $project_prefix Specific Plugin"
+				read -rp "What is the project name?"$'\n' project_name
+				echo "Description: This is a site-specific plugin for $project_name"
+				echo "*/"
+				echo ""
+				echo "if ( ! defined( 'ABSPATH' ) ) {"
+				echo "	exit;	// Exit if accessed directly"
+				echo "}"
+				echo ""
+			} >> ~/Projects/"$project_prefix"-specific-plugin/"$project_prefix"-specific-plugin.php
+
+			# Find out which parts of the plugin are required for the project and create the respective files
+			##################################################################################################
+
+			#####################
+			# Custom post types #
+			#####################
+			while true; do
+   				read -rp "Will you be using custom post types?" yn
+    				case $yn in
+        				[Yy]* )
+						# Create the custom post types file
+						mkdir -p ~/Projects/"$project_prefix"-specific-plugin/includes
+						mkdir -p ~/Projects/"$project_prefix"-specific-plugin/includes/register
+						touch ~/Projects/"$project_prefix"-specific-plugin/includes/register/"$project_prefix"-register-post-types.php
+
+						# Print the basic custom post type declaration into it
+						{
+							echo "<?php"
+							echo ""
+							echo "if ( ! defined( 'ABSPATH' ) ) {"
+							echo "	exit; // Exit if accessed directly."
+							echo "}"
+							echo ""
+							echo "/*********************"
+							echo "** CUSTOM POST TYPE **"
+							echo "*********************/"
+							echo "function ${project_prefix}_create_custom_post_type() {"
+							echo ""
+							echo "	\$labels = array("
+							echo "		'name'			=> __('Custom post types', '$project_prefix')"
+							echo "		'singular_name'		=> __('Custom post type', '$project_prefix')"
+							echo "		'add_new'		=> __('Add new custom post type', '$project_prefix')"
+							echo "		'add_new_item'		=> __('Add new custom post type', '$project_prefix')"
+							echo "		'edit_item'		=> __('Edit custom post type', '$project_prefix')"
+							echo "		'new_item'		=> __('New custom post type', '$project_prefix')"
+							echo "		'all_items'		=> __('All custom post types', '$project_prefix')"
+							echo "		'view_item'		=> __('View custom post type', '$project_prefix')"
+							echo "		'search_items'		=> __('Search custom post types', '$project_prefix')"
+							echo "		'not_found'		=> __('No custom post types found', '$project_prefix')"
+							echo "		'not_found_in_trash'	=> __('No custom post types found in trash', '$project_prefix')"
+							echo "		'parent_item_colon'	=> '',"
+							echo "		'menu_name'		=> __('Custom Post Type', '$project_prefix')"
+							echo "	);"
+							echo ""
+							echo "	register_post_type( 'custom_post_type',"
+							echo "		array("
+							echo "			'labels'		=> \$labels,"
+							echo "			'menu_position'		=> 5,"
+							echo "			'menu_icon'		=> 'dashicons_businessperson',"
+							echo "			'has_archive'		=> true,"
+							echo "			'public'		=> true,"
+							echo "			'supports'		=> array('title' /*, 'editor', 'excerpt', 'thumbnail', 'page-attributes' */ ),"
+							echo "			'exclude_from_search'	=> false"
+							echo "			'capability_type'	=> 'post',"
+							echo "		)"
+							echo "	);"
+							echo "}"
+							echo "add_action( 'init', '${project_prefix}_create_custom_post_type' );"
+						} >> ~/Projects/"$project_prefix"-specific-plugin/includes/register/"$project_prefix"-register-post-types.php
+
+						# Include the custom post types file
+						echo "include 'includes/register/$project_prefix-register-post-types.php';" >> ~/Projects/"$project_prefix"-specific-plugin/"$project_prefix"-specific-plugin.php
+						break;;
+        				[Nn]* )
+						break;;
+        				* )
+						echo "Please answer yes or no."
+    				esac
+			done
+
+			#############
+			# METABOXES #
+			#############
+			while true; do
+				read -rp "Will you be using metaboxes?" yn
+				case $yn in
+					[Yy]* )
+						# Create the file containing metabox declarations
+						mkdir -p ~/Projects/"$project_prefix"-specific-plugin/includes
+						mkdir -p ~/Projects/"$project_prefix"-specific-plugin/includes/register
+						touch ~/Projects/"$project_prefix"-specific-plugin/includes/register/"$project_prefix"-metaboxes.php
+
+						# Include the file
+						echo "include 'includes/register/$project_prefix-register-metaboxes.php;'" >> ~/Projects/"$project_prefix"-specific-plugin/"$project_prefix"-specific-plugin.php
+						break;;
+					[Nn]* )
+						break;;
+					* )
+						echo "Please answer yes or no.";;
+				esac
+			done
+
+			##############
+			# USER ROLES #
+			##############
+			while true; do
+				read -rp "Will you be using custom user roles?" yn
+				case $yn in
+					[Yy]* )
+						# Create the file registering the custom user roles
+						mkdir -p ~/Projects/$project_prefix-specific-plugin/includes
+						mkdir -p ~/Projects/${project_prefix}-specific-plugin/includes/register
+						touch ~/Projects/${project_prefix}-specific-plugin/includes/register/${project_prefix}-register-roles.php
+
+						# Include the file
+						echo "include 'includes/register/${project_prefix}-register-roles.php;'" >> ~/Projects/$project_prefix-specific-plugin/$project_prefix-specific-plugin.php
+						break;;
+					[Nn]* )
+						break;;
+					* )
+						echo "Please answer yes or no.";;
+				esac
+			done
+
+			##############
+			# TAXONOMIES #
+			##############
+			while true; do
+				read -rp "Will you be using custom taxonomies?" yn
+				case $yn in
+					[Yy]* )
+						mkdir -p ~/Projects/$project_prefix-specific-plugin/includes
+						echo "include 'includes/register/$project_prefix-register-taxonomies.php;'" >> ~/Projects/$project_prefix-specific-plugin/$project_prefix-specific-plugin.php
+						break;;
+					[Nn]* )
+						break;;
+					* )
+						echo "Please answer yes or no.";;
+				esac
+			done
+
+			##############
+			# SHORTCODES #
+			##############
+			while true; do
+				read -rp "Will you be using shortcodes?" yn
+				case $yn in
+					[Yy]* )
+						# Create the file and template stuff
+						mkdir -p ~/Projects/$project_prefix-specific-plugin/includes
+						touch ~/Projects/$project_prefix-specific-plugin/includes/$project_prefix-shortcodes.php
+						{
+							echo "<?php"
+							echo ""
+							echo "/*"
+							echo "** Placeholder Shortcode **"
+							echo "*/"
+							echo ""
+							echo "function $project_prefix\_shortcode_name(){"
+							echo "//do stuff"
+							echo "}"
+							echo "add_shortcode('fn_$project_prefix\_shortcode_name', '$project_prefix\_shortcode_name');"
+							echo ""
+						} >> ~/Projects/"$project_prefix"-specific-plugin/includes/"$project_prefix"-shortcodes.php
+
+						# Include the file
+						echo "include 'includes/register/$project_prefix-shortcodes.php;'" >> ~/Projects/$project_prefix-specific-plugin/$project_prefix-specific-plugin.php
+						break;;
+					[Nn]* )
+						break;;
+					* )
+						echo "Please answer yes or no.";;
+				esac
+			done
+
+			#####################
+			# /my-account pages #
+			#####################
+			while true; do
+				read -rp "Will you be using custom /my-account pages? (Woocommerce user dashboard)" yn
+				case $yn in
+					[Yy]* )
+						mkdir -p ~/Projects/$project_prefix-specific-plugin/admin-pages
+						echo "include 'admin-pages/$project_prefix-my-account-pages.php;'" >> ~/Projects/$project_prefix-specific-plugin/$project_prefix-specific-plugin.php
+						break;;
+					[Nn]* )
+						break;;
+					* )
+						echo "Please answer yes or no.";;
+				esac
+			done
+
+			break
+
+		elif (( REPLY == 2 )) ; then
+			# nodejs API
+			read -rp "Name the project"$'\n' prefix
+			mkdir ~/Projects/$prefix-api
+			break
+		fi
+        else
+            echo "Invalid option. Try another one."
+        fi
+done

@@ -1,0 +1,56 @@
+#!/bin/bash
+
+#########################################################################
+#                                                                       #
+#           .___.__        .__  __         .__        __   .__          #
+#         __| _/|__| _____ |__|/  |________|__| _____|  | _|  |         #
+#        / __ | |  |/     \|  \   __\_  __ \  |/  ___/  |/ /  |         #
+#       / /_/ | |  |  Y Y  \  ||  |  |  | \/  |\___ \|    <|  |__       #
+#       \____ | |__|__|_|  /__||__|  |__|  |__/____  >__|_ \____/       #
+#            \/          \/                        \/     \/            #
+#                                                                       #
+#########################################################################
+
+######################
+# System Information #
+######################
+echo ''
+echo '#############'
+echo '# PROCESSES #'
+echo '#############'
+echo ''
+echo '# Memory intensive #'
+ps achx -o cmd:25,%mem --sort=-%mem | sed 5q
+echo ''
+echo '# CPU intensive #'
+ps achx -o cmd:25,%cpu --sort=-%cpu | sed 5q
+
+echo ''
+
+echo '###################'
+echo '# HARDWARE STATUS #'
+echo '###################'
+echo ''
+sensors | awk '/^Core 0/ {print "Core temprature: " $3}'
+free -h | awk '/^Mem:/ {print "Memory used/total:" $3 "/" $2}'
+printf "Battery remaining: " && cat /sys/class/power_supply/BAT0/capacity
+
+echo ''
+
+echo '#######'
+echo '# RIG #'
+echo '#######'
+echo '# RAM #'
+sudo lshw -short -C memory | awk '/System Memory|DDR3|DIMM/ {$1=$2=""; print $0}'
+echo ''
+echo '# CPU #'
+cat /proc/cpuinfo | awk '/^model name/ {$1=$2=$3=""; print "CPU: " $0}'
+cat /proc/cpuinfo | awk 'match("$1", /^model name$/) {$1=$2=$3=""; print "CPU: " $0}'
+echo '# DISK #'
+disk_size="$(lsblk -dn -o size)"
+disk_rotating="$(lsblk -dn -o rota)"
+if (( disk_rotating == 1 )); then
+	printf "HDD: ${disk_size}\n"
+else
+	printf "SSD: ${disk_size}\n"
+fi

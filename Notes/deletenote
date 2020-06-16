@@ -1,0 +1,26 @@
+#!/bin/bash
+# This script allows to delete a note from ~/mynotes
+
+
+
+
+prompt="Which note do you want to delete?"
+options=($(ls -1 ~/mynotes))
+
+PS3="$prompt "
+
+select opt in "${options[@]}" "Quit" ; do
+    if (( REPLY == 1 + ${#options[@]} )) ; then
+        exit
+    elif (( REPLY > 0 && REPLY <= ${#options[@]} )) ; then
+	read -r -p 'Are you sure you want to delete this note? [y/n]' yn
+	case $yn in
+        	[Yy]* ) rm ~/mynotes/"$opt";;
+        	[Nn]* ) exit;;
+        	* ) echo 'Error';;
+	esac
+	break
+    else
+        echo "Invalid option."
+    fi
+done

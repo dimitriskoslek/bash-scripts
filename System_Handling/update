@@ -1,0 +1,54 @@
+#!/bin/bash
+# This script does a full update on the system
+
+echo "########"
+echo "# Rust #"
+echo "########"
+rustup update
+
+echo "##########"
+echo "# Nodejs #"
+echo "##########"
+# Update NVM itself by downloading it anew
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.1/install.sh | bash
+# Source NVM to use it
+. ~/.nvm/nvm.sh
+# Install latest node version and the latest matching npm version
+nvm install node --latest-npm
+
+echo "########"
+echo "# DENO #"
+echo "########"
+read -p "Do you want to upgrade Deno to the latest version? " yn
+while true; do
+	case $yn in
+		[Yy]* ) deno upgrade; break;;
+		[Nn]* ) break;;
+		* ) echo "Please answer yes or no.";;
+	esac
+done
+
+echo "##############"
+echo "# Youtube-dl #"
+echo "##############"
+sudo youtube-dl -U
+
+echo "############"
+echo "# Packages #"
+echo "############"
+sudo apt update
+
+echo "################"
+echo "# Dist-Upgrade #"
+echo "################"
+sudo apt dist-upgrade
+
+echo "##############"
+echo "# Autoremove #"
+echo "##############"
+sudo apt autoremove
+
+echo "#############"
+echo "# Autoclean #"
+echo "#############"
+sudo apt autoclean

@@ -1,0 +1,5 @@
+#!/bin/bash
+# This script creates a new note in ~/mynotes/
+read -r -p "Name the new note"$'\n' newnote_name 
+touch ~/mynotes/"$newnote_name"
+nano ~/mynotes/"$newnote_name"

@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# Get the link and desired name from user input
+read -r -p "Please enter link to download form"$'\n' link
+read -r -p "Name the file"$'\n' file_name
+
+file_extension=".mp3"
+full_file_name="${file_name}${file_extension}"
+
+# Ask where the file should be placed
+prompt="Which folder should the file be placed in?"
+options=($(ls -1 ~/Music))
+
+PS3="$prompt "
+
+select opt in "${options[@]}" "Quit" ; do
+    if (( REPLY == 1 + ${#options[@]} )) ; then
+        exit
+    elif (( REPLY > 0 && REPLY <= ${#options[@]} )) ; then
+        youtube-dl --extract-audio --output ~/Music/"$opt"/"$full_file_name" "$link"
+	ffmpeg -i ~/Music/"$opt"/"$file_name".opus ~/Music/"$opt"/"$full_file_name"
+	rm ~/Music/"$opt"/"$file_name".opus
+	break
+    else
+        echo "Invalid option. Try another one."
+    fi
+done
